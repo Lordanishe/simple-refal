@@ -5,17 +5,26 @@ FuncArguments {
 NakedArguments {
   = 'refalrts::Iter, refalrts::Iter';
 }
-
+/*
 TextFromMemoryClass {
   #GN-Local = 'static '; #GN-Entry = ;
 }
+*/
 
 SwGenFnStart {
-  s.MemoryClass s.FnArguments e.Name =
-    (
-      <TextFromMemoryClass s.MemoryClass>
-      'refalrts::FnResult ' e.Name '(' <s.FnArguments> ') {'
-    )
+  #GN-Local s.FnArguments e.Name =
+    <GenForward e.Name>
+    ('static refalrts::FnResult func_' e.Name '(' <s.FnArguments> ') {')
+    ('  refalrts::this_is_generated_function();');
+
+  #GN-Entry s.FnArguments e.Name =
+    ('static refalrts::FnResult func_' e.Name '(' <FuncArguments> ');')
+    ()
+    ('refalrts::RefalFunction ' e.Name ' = {')
+    ('  func_' e.Name ', "' e.Name '"')
+    ('};')
+    ()
+    ('refalrts::FnResult func_' e.Name '(' <s.FnArguments> ') {')
     ('  refalrts::this_is_generated_function();');
 }
 
@@ -26,12 +35,21 @@ GenFnStart {
 
 GenExtern {
   e.Name =
-    ('extern refalrts::FnResult ' e.Name '(' <FuncArguments> ');');
+    ('extern refalrts::RefalFunction ' e.Name ';');
 }
 
 GenForward {
   e.Name =
-    ('static refalrts::FnResult ' e.Name '(' <FuncArguments> ');');
+    ('#ifndef defined_' e.Name)
+    ('#define defined_' e.Name)
+    ('static refalrts::FnResult func_' e.Name '(' <FuncArguments> ');')
+    ()
+    ('static refalrts::RefalFunction ' e.Name ' = {')
+    ('  func_' e.Name ', "' e.Name '"')
+    ('};')
+    ()
+    ('#endif /* ' e.Name ' */')
+    ();
 }
 
 GenReturn {
@@ -61,7 +79,9 @@ GenSwap {
     ('  refalrts::move_left( info_b, info_e );')
     ('  refalrts::move_right( info_b, info_e );')
     ()
-    ('  static refalrts::Iter s_head = refalrts::initialize_swap_head( func_name );')
+    ('  static refalrts::RefalSwapHead holder;')
+    ('  static refalrts::Iter s_head =')
+    ('    refalrts::initialize_swap_head( func_name, & holder );')
     ()
     ('  refalrts::Iter saved_b;')
     ('  refalrts::Iter saved_e;')
@@ -408,19 +428,14 @@ GenCommand {
 
   (e.Indent) (#CmdiFuncArray e.FuncNames (e.LastName)) =
     (e.Indent)
-    (e.Indent 'static const refalrts::RefalFunction functions[] = {')
+    (e.Indent 'static const refalrts::RefalFunction *functions[] = {')
     <Map
       {
-        (e.Name) =
-          (e.Indent
-            '  { ' <PrintName e.Name> ', "' <PrintName e.Name> '" },'
-          );
+        (e.Name) = (e.Indent '  & ' <PrintName e.Name> ',');
       }
       e.FuncNames
     >
-    (e.Indent
-      '  { ' <PrintName e.LastName> ', "' <PrintName e.LastName> '" }'
-    )
+    (e.Indent '  & ' <PrintName e.LastName>)
     (e.Indent '};');
 
   (e.Indent) (#CmdiLabelArray) =
@@ -716,7 +731,7 @@ PrintMatchName {
   (e.Indent) s.Direction s.BracketNumber e.Name =
     <PrintMatch
       (e.Indent) s.Direction s.BracketNumber
-      ('function') e.Name
+      ('function') '& ' e.Name
     >;
 }
 
@@ -742,7 +757,7 @@ PrintMatchADT {
     <PrintMatch
       (e.Indent) s.Direction s.BracketNumber
       ('adt')
-      <ContextRange s.InnerNum> ', '
+      <ContextRange s.InnerNum> ', & '
       e.Name
     >;
 }
@@ -829,7 +844,7 @@ AllocatorFuncName {
 AllocatorFuncArgument {
   #ElChar s.Char = ', ' '' <Escape s.Char> '';
 
-  #ElName e.Name = ', ' <PrintName e.Name> ', "' <PrintName e.Name> '"';
+  #ElName e.Name = ', & ' <PrintName e.Name>;
 
   #ElNumber s.Number = ', ' <StrFromInt s.Number> 'UL';
 

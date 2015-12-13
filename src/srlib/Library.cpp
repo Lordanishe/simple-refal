@@ -69,9 +69,20 @@ DEFINE_IDENT(TypeFunction);
 DEFINE_IDENT(TypeFile);
 DEFINE_IDENT(TypeIdentifier);
 
+#define DECLARE_ENTRY_FUNCTION(name) \
+  static refalrts::FnResult func_ ## name( \
+    refalrts::Iter arg_begin, refalrts::Iter arg_end \
+  ); \
+  \
+  refalrts::RefalFunction name = { func_ ## name, #name }; \
+  \
+  static refalrts::FnResult func_ ## name( \
+    refalrts::Iter arg_begin, refalrts::Iter arg_end \
+  )
+
 // Математические операции
 
-refalrts::FnResult Add(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Add) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -110,7 +121,7 @@ refalrts::FnResult Add(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult Sub(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Sub) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -149,7 +160,7 @@ refalrts::FnResult Sub(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult Mul(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Mul) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -188,7 +199,7 @@ refalrts::FnResult Mul(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult Div(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Div) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -227,7 +238,7 @@ refalrts::FnResult Div(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult Mod(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Mod) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -302,12 +313,7 @@ refalrts::FnResult write_to_stream(
       }
 
       case refalrts::cDataFunction: {
-        if( p->function_info.name[0] != '\0' ) {
-          printf_res = fprintf( out, "%s ", p->function_info.name );
-        } else {
-          printf_res = fprintf( out, "&%p ", p->function_info.ptr );
-        }
-
+        printf_res = fprintf( out, "%s ", p->function_info->name );
         if( printf_res < 0 ) {
           return refalrts::cRecognitionImpossible;
         } else {
@@ -412,7 +418,7 @@ refalrts::FnResult write_to_stream(
   }
 }
 
-refalrts::FnResult WriteLine(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(WriteLine) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -441,7 +447,7 @@ refalrts::FnResult WriteLine(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult FWriteLine(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(FWriteLine) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -521,9 +527,7 @@ refalrts::FnResult read_from_stream(
   return refalrts::cSuccess;
 }
 
-refalrts::FnResult ReadLine(
-  refalrts::Iter arg_begin, refalrts::Iter arg_end
-) {
+DECLARE_ENTRY_FUNCTION(ReadLine) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -554,9 +558,7 @@ refalrts::FnResult ReadLine(
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult FReadLine(
-  refalrts::Iter arg_begin, refalrts::Iter arg_end
-) {
+DECLARE_ENTRY_FUNCTION(FReadLine) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -638,7 +640,7 @@ refalrts::FnResult string_from_seq(
 
 } // unnamed namespace
 
-refalrts::FnResult FOpen(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(FOpen) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -699,7 +701,7 @@ refalrts::FnResult FOpen(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult FClose(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(FClose) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -743,7 +745,7 @@ refalrts::FnResult FClose(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
 extern char **g_argv;
 extern int g_argc;
 
-refalrts::FnResult Arg(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Arg) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -781,7 +783,7 @@ refalrts::FnResult Arg(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult ExistFile(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(ExistFile) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -832,7 +834,7 @@ refalrts::FnResult ExistFile(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult GetEnv(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(GetEnv) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -885,7 +887,7 @@ refalrts::FnResult GetEnv(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult Exit(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Exit) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -912,7 +914,7 @@ refalrts::FnResult Exit(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult System(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(System) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -953,7 +955,7 @@ refalrts::FnResult System(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
 
 // Работа с типами символов
 
-refalrts::FnResult IntFromStr(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(IntFromStr) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -1023,7 +1025,7 @@ refalrts::FnResult IntFromStr(refalrts::Iter arg_begin, refalrts::Iter arg_end) 
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult StrFromInt(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(StrFromInt) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -1084,7 +1086,7 @@ refalrts::FnResult StrFromInt(refalrts::Iter arg_begin, refalrts::Iter arg_end) 
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult Chr(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Chr) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -1117,7 +1119,7 @@ refalrts::FnResult Chr(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult Ord(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(Ord) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -1166,7 +1168,7 @@ char compare_char( T x, T y ) {
 
 } // unnamed namespace
 
-refalrts::FnResult SymbCompare(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(SymbCompare) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
@@ -1256,8 +1258,8 @@ refalrts::FnResult SymbCompare(refalrts::Iter arg_begin, refalrts::Iter arg_end)
           {
             int cmpres =
               strcmp(
-                sSymb1_1->function_info.name,
-                sSymb2_1->function_info.name
+                sSymb1_1->function_info->name,
+                sSymb2_1->function_info->name
               );
 
             if( cmpres < 0 ) {
@@ -1267,8 +1269,8 @@ refalrts::FnResult SymbCompare(refalrts::Iter arg_begin, refalrts::Iter arg_end)
             } else {
               order =
                 compare_char(
-                  sSymb1_1->function_info.ptr,
-                  sSymb2_1->function_info.ptr
+                  sSymb1_1->function_info->ptr,
+                  sSymb2_1->function_info->ptr
                 );
             }
           }
@@ -1380,7 +1382,7 @@ refalrts::FnResult SymbCompare(refalrts::Iter arg_begin, refalrts::Iter arg_end)
   return refalrts::cRecognitionImpossible;
 }
 
-refalrts::FnResult SymbType(refalrts::Iter arg_begin, refalrts::Iter arg_end) {
+DECLARE_ENTRY_FUNCTION(SymbType) {
   do {
     refalrts::Iter bb_0 = arg_begin;
     refalrts::Iter be_0 = arg_end;
